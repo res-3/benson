@@ -4,25 +4,18 @@ use serenity::{
     client::{Context, EventHandler},
     model::{
         channel::Message,
-        guild::PartialMember,
-        id::{ChannelId, GuildId, RoleId, UserId},
+        id::{ChannelId, GuildId, RoleId},
         prelude::{Activity, Ready},
     },
 };
-use tracing::{debug, error, info, warn};
+use tracing::{debug, info, warn};
 
 use crate::{
     audio::{join_guild_voice_channel, leave_guild_voice_channels},
+    auto_reactions::maybe_autoreact,
     config::Config,
+    discord_utils::{send_message, validate_user},
 };
-
-fn validate_user(member: &PartialMember, bot_dev_role: &RoleId) -> bool {
-    member.roles.contains(bot_dev_role)
-        || match &member.user {
-            Some(user) => user.id == UserId(375371353085444097),
-            None => false,
-        }
-}
 
 pub struct Handler {
     pub config: Config,
@@ -32,6 +25,9 @@ pub struct Handler {
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
+        // Handle auto-reactions
+        maybe_autoreact(&msg, &ctx, &ChannelId(self.config.heart_react_channel)).await;
+
         // Check if the sender is a privileged user
         let is_privileged = match msg.member {
             Some(member) => validate_user(&member, &RoleId(self.config.bot_developer_role)),
@@ -41,88 +37,82 @@ impl EventHandler for Handler {
         // Grab the first "word" of the message in search of a command
         let mut args = msg.content.split_whitespace();
         match args.next() {
-            Some(cmd) => match cmd {
-                "!benson_ping" => {
+            Some(cmd) => {
+                if cmd.starts_with("!") {
+                    // Log the command
                     info!(
-                        "Got command benson_ping from user: {} (prived: {})",
-                        msg.author.name, is_privileged
+                        "Got command {} from user: {} (prived: {})",
+                        cmd, msg.author.name, is_privileged
                     );
-                    if is_privileged {
-                        if let Err(why) = msg
-                            .channel_id
-                            .say(
-                                &ctx.http,
-                                format!("Bot has been running since `{}`", self.start_time),
-                            )
-                            .await
-                        {
-                            error!("Error sending message: {:?}", why);
-                        }
-                    }
-                }
-                "!benson_join_vc" => {
-                    info!(
-                        "Got command benson_join_vc from user: {} (prived: {})",
-                        msg.author.name, is_privileged
-                    );
-                    if is_privileged {
-                        // Parse the second arg
-                        if let Some(channel) = args.next() {
-                            // Parse the channel
-                            if let Ok(channel) = channel.parse::<u64>() {
-                                // Join the voice channel
-                                join_guild_voice_channel(
+
+                    match cmd {
+                        // Ping command
+                        // This command responds with a message containing the bot uptime
+                        "!benson_ping" => {
+                            if is_privileged {
+                                send_message(
+                                    &format!("Bot has been running since `{}`", self.start_time),
+                                    &msg.channel_id,
                                     &ctx,
-                                    GuildId(self.config.guild),
-                                    ChannelId(channel),
                                 )
                                 .await;
-                            } else {
-                                if let Err(why) = msg
-                                    .channel_id
-                                    .say(
-                                        &ctx.http,
-                                        format!("Could not join VC with id `{}`", channel),
+                            }
+                        }
+                        // Join command
+                        // This command joins a specific voice channel
+                        "!benson_join_vc" | "~bvc" => {
+                            if is_privileged {
+                                // Parse the second arg
+                                if let Some(channel) = args.next() {
+                                    // Parse the channel
+                                    if let Ok(channel) = channel.parse::<u64>() {
+                                        // Join the voice channel
+                                        join_guild_voice_channel(
+                                            &ctx,
+                                            GuildId(self.config.guild),
+                                            ChannelId(channel),
+                                        )
+                                        .await;
+                                    } else {
+                                        send_message(
+                                            &format!("Could not join VC with id `{}`", channel),
+                                            &msg.channel_id,
+                                            &ctx,
+                                        )
+                                        .await;
+                                    }
+                                } else {
+                                    send_message(
+                                        "`Usage: !benson_join_vc <id>`",
+                                        &msg.channel_id,
+                                        &ctx,
                                     )
-                                    .await
-                                {
-                                    error!("Error sending message: {:?}", why);
+                                    .await;
                                 }
                             }
-                        } else {
-                            if let Err(why) = msg
-                                .channel_id
-                                .say(&ctx.http, "`Usage: !benson_join_vc <id>`")
-                                .await
-                            {
-                                error!("Error sending message: {:?}", why);
+                        }
+                        // Leave command
+                        // This command leaves all voice channels
+                        "!benson_flush" | "!benson_fuckoff" | "!benson_leave" => {
+                            if is_privileged {
+                                // Leave all VCs
+                                leave_guild_voice_channels(&ctx, GuildId(self.config.guild)).await;
+
+                                // Notify user
+                                send_message(
+                                    "Bot has left all voice channels",
+                                    &msg.channel_id,
+                                    &ctx,
+                                )
+                                .await;
                             }
                         }
-                    }
-                }
-                "!benson_flush" => {
-                    info!(
-                        "Got command benson_flush from user: {} (prived: {})",
-                        msg.author.name, is_privileged
-                    );
-                    if is_privileged {
-                        // Leave all VCs
-                        leave_guild_voice_channels(&ctx, GuildId(self.config.guild)).await;
-
-                        // Notify user
-                        if let Err(why) = msg
-                            .channel_id
-                            .say(&ctx.http, "Bot has left all voice channels")
-                            .await
-                        {
-                            error!("Error sending message: {:?}", why);
+                        _ => {
+                            debug!("Unknown command: {}", cmd);
                         }
                     }
                 }
-                _ => {
-                    debug!("Unknown command: {}", cmd);
-                }
-            },
+            }
             None => {
                 warn!("Message called without data");
             }

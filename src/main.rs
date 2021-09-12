@@ -9,6 +9,8 @@ use crate::config::Config;
 mod audio;
 mod command_handler;
 mod config;
+mod discord_utils;
+mod auto_reactions;
 
 #[tokio::main]
 async fn main() {
