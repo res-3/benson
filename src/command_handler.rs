@@ -107,7 +107,7 @@ impl EventHandler for Handler {
                     );
                     if is_privileged {
                         // Leave all VCs
-                        leave_guild_voice_channels(&ctx, GuildId(self.config.guild));
+                        leave_guild_voice_channels(&ctx, GuildId(self.config.guild)).await;
 
                         // Notify user
                         if let Err(why) = msg

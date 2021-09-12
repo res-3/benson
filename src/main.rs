@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg};
 use serenity::Client;
 use songbird::{SerenityInit, Songbird};
