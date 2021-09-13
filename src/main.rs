@@ -8,7 +8,6 @@ use crate::{config::Config, discord::init_bot_client};
 
 mod audio;
 mod auto_reactions;
-mod command_handler;
 mod config;
 mod discord_utils;
 

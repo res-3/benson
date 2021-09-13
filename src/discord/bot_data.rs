@@ -1,7 +1,13 @@
 use serenity::{
     http::Http,
-    model::{id::UserId, prelude::CurrentApplicationInfo},
+    model::{
+        guild::PartialMember,
+        id::{RoleId, UserId},
+        prelude::CurrentApplicationInfo,
+    },
 };
+
+use crate::{config::Config, discord_utils::validate_user};
 
 /// Get the bot's settings & metadata
 pub async fn get_bot_metadata(
@@ -21,4 +27,12 @@ pub async fn get_bot_owners(app_info: &CurrentApplicationInfo) -> Vec<UserId> {
         })
     }
     output
+}
+
+/// Check if a member is defined as a privileged user
+pub fn check_if_privileged(member: &Option<PartialMember>, config: &Config) -> bool {
+    match member {
+        Some(member) => validate_user(member, &RoleId(config.bot_developer_role)),
+        None => false,
+    }
 }

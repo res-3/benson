@@ -2,27 +2,20 @@ use chrono::{DateTime, Utc};
 use serenity::{
     async_trait,
     client::{Context, EventHandler},
-    model::prelude::{Activity, Ready},
+    model::{
+        channel::Message,
+        id::ChannelId,
+        prelude::{Activity, Ready},
+    },
 };
 use tracing::info;
 
-use crate::config::Config;
+use crate::auto_reactions::maybe_autoreact;
 
-/// The main struct that handles all discord events and contains bot state
-pub struct BotEventHandler {
-    startup_time: DateTime<Utc>,
-    config: Config,
-}
+use super::state::BotState;
 
-impl BotEventHandler {
-    /// Construct a new `BotEventHandler`.
-    pub fn new(config: &Config) -> Self {
-        Self {
-            startup_time: Utc::now(),
-            config: (*config).clone(),
-        }
-    }
-}
+/// The main struct that handles all discord events
+pub struct BotEventHandler;
 
 #[async_trait]
 impl EventHandler for BotEventHandler {
@@ -32,5 +25,15 @@ impl EventHandler for BotEventHandler {
         // Set the bot status
         ctx.set_activity(Activity::watching("over my children"))
             .await;
+    }
+
+    async fn message(&self, ctx: Context, msg: Message) {
+        // Get a read lock on the config data
+        let data_lock = ctx.data.read().await;
+        let state_arc = data_lock.get::<BotState>().unwrap().clone();
+        let state = state_arc.read().await;
+
+        // Handle auto-reactions
+        maybe_autoreact(&msg, &ctx, &ChannelId(state.config.heart_react_channel)).await;
     }
 }

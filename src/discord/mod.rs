@@ -1,6 +1,7 @@
-use std::{collections::HashSet, iter::FromIterator};
+use std::{collections::HashSet, iter::FromIterator, sync::Arc};
 
-use serenity::{framework::StandardFramework, Client};
+use chrono::Utc;
+use serenity::{framework::StandardFramework, prelude::RwLock, Client};
 use songbird::{SerenityInit, Songbird};
 
 use crate::config::Config;
@@ -8,11 +9,13 @@ use crate::config::Config;
 use self::{
     bot_data::{get_bot_metadata, get_bot_owners},
     event_handler::BotEventHandler,
+    state::{BotState, State},
 };
 
 pub mod bot_data;
 mod commands;
 mod event_handler;
+mod state;
 
 /// Set up and create the bot client
 pub async fn init_bot_client(
@@ -35,16 +38,28 @@ pub async fn init_bot_client(
                 .prefix("!")
                 .owners(owners_map)
         })
-        .group(&commands::BOTCOMMANDS_GROUP).group(&commands::BENSONCOMMANDS_GROUP);
+        .group(&commands::BOTCOMMANDS_GROUP)
+        .group(&commands::BENSONCOMMANDS_GROUP);
 
     // Get a voice context
     let voice = Songbird::serenity();
 
     // Set up the client
-    Client::builder(discord_token)
+    let client = Client::builder(discord_token)
         .application_id(*discord_app_id)
         .framework(framework)
-        .event_handler(BotEventHandler::new(config))
+        .event_handler(BotEventHandler)
         .register_songbird_with(voice)
-        .await
+        .await?;
+
+    // Open the bot config for writing, and clone the config struct into it
+    {
+        let mut data = client.data.write().await;
+        data.insert::<BotState>(Arc::new(RwLock::new(State {
+            config: config.clone(),
+            startup_time: Utc::now(),
+        })));
+    }
+
+    Ok(client)
 }
