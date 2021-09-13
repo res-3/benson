@@ -1,6 +1,6 @@
 use serde::{Deserialize};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     pub heart_react_channel: u64,
     pub developer_channel: u64,

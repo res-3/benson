@@ -4,13 +4,15 @@ use serenity::Client;
 use songbird::{SerenityInit, Songbird};
 use tracing::{error, info};
 
-use crate::config::Config;
+use crate::{config::Config, discord::init_bot_client};
 
 mod audio;
+mod auto_reactions;
 mod command_handler;
 mod config;
 mod discord_utils;
-mod auto_reactions;
+
+mod discord;
 
 #[tokio::main]
 async fn main() {
@@ -40,21 +42,12 @@ async fn main() {
         .parse()
         .expect("Application ID is not valid");
 
-    // Get a voice context
-    let voice = Songbird::serenity();
-
-    // Build the discord bot
-    let mut client = Client::builder(&discord_token)
-        .event_handler(command_handler::Handler {
-            config,
-            start_time: Utc::now(),
-        })
-        .application_id(discord_app_id)
-        .register_songbird_with(voice)
+    // Set up the bot client
+    let mut client = init_bot_client(&discord_token, &discord_app_id, &config)
         .await
-        .expect("Err creating client");
+        .expect("Failed to init bot client");
 
-    // Run the bot
+    // Run the client
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
     }

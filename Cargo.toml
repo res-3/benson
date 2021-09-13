@@ -24,7 +24,9 @@ serenity = { version = "^0.10.2", default-features = false, features = [
     "http",
     "utils",
     "voice",
-    "cache"
+    "cache",
+    "standard_framework",
+    "framework"
 ] }
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1.0.126", features = ["derive"] }
