@@ -6,7 +6,7 @@ Benson, the light that warms all
 
 | Command                | Info                             |
 |------------------------|----------------------------------|
-| `!benson ping`         | Checks benson bot status         |
+| `!benson status`         | Checks benson bot status         |
 | `!benson join_vc <id>` | Joins a voice channel by ID      |
 | `!benson fuckoff`     | Leaves the current voice channel |
 
