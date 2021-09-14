@@ -45,6 +45,8 @@ chrono = "0.4"
 chrono-humanize = "0.2"
 hostname = "0.3"
 uwuify = "0.2"
+async-minecraft-ping = "0.4"
+rand = "0.8"
 
 [profile.release]
 lto = true

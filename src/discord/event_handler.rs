@@ -10,7 +10,7 @@ use serenity::{
 };
 use tracing::info;
 
-use crate::auto_reactions::maybe_autoreact;
+use crate::auto_reactions::{maybe_autoreact, maybe_benson_greeting, maybe_correct_luna};
 
 use super::state::BotState;
 
@@ -35,5 +35,7 @@ impl EventHandler for BotEventHandler {
 
         // Handle auto-reactions
         maybe_autoreact(&msg, &ctx, &ChannelId(state.config.heart_react_channel)).await;
+        maybe_benson_greeting(&msg, &ctx, &state.config).await;
+        maybe_correct_luna(&msg, &ctx).await;
     }
 }
