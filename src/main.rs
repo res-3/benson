@@ -10,7 +10,7 @@ mod audio;
 mod auto_reactions;
 mod config;
 mod discord_utils;
-
+mod bonk_count;
 mod discord;
 
 #[tokio::main]

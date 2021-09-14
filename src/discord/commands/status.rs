@@ -7,7 +7,7 @@ use serenity::{
 };
 use tracing::info;
 
-use crate::discord::{bot_data::check_if_privileged, state::BotState};
+use crate::{bonk_count::read_bonk_count, discord::{bot_data::check_if_privileged, state::BotState}};
 
 #[command]
 pub async fn status(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
@@ -16,30 +16,31 @@ pub async fn status(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
     let state_arc = data_lock.get::<BotState>().unwrap().clone();
     let state = state_arc.read().await;
 
-    // Check if the user has permission to use this command
-    if check_if_privileged(&msg.member, &state.config) {
-        info!("Executing status command from user: {}", msg.author);
-        
-        // Get the uptime
-        let uptime = chrono_humanize::HumanTime::from(Utc::now() - state.startup_time)
-            .to_text_en(Accuracy::Rough, Tense::Present);
+    info!("Executing status command from user: {}", msg.author);
 
-        // Send the message
-        msg.channel_id
-            .say(
-                &ctx.http,
-                format!(
-                    "**Uptime:** {}\n**Mode:** {}\n**Host:** `{}`",
-                    uptime,
-                    match cfg!(debug_assertions) {
-                        true => "Development",
-                        false => "Production",
-                    },
-                    hostname::get().unwrap_or("Unknown".into()).to_str().unwrap()
-                ),
-            )
-            .await?;
-    }
+    // Get the uptime
+    let uptime = chrono_humanize::HumanTime::from(Utc::now() - state.startup_time)
+        .to_text_en(Accuracy::Rough, Tense::Present);
+
+    // Send the message
+    msg.channel_id
+        .say(
+            &ctx.http,
+            format!(
+                "**Uptime:** {}\n**Mode:** {}\n**Host:** `{}`\n**Bonks:** `{}`",
+                uptime,
+                match cfg!(debug_assertions) {
+                    true => "Development",
+                    false => "Production",
+                },
+                hostname::get()
+                    .unwrap_or("Unknown".into())
+                    .to_str()
+                    .unwrap(),
+                read_bonk_count()
+            ),
+        )
+        .await?;
 
     Ok(())
 }
