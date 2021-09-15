@@ -9,6 +9,7 @@ use serenity::{
     },
 };
 use tracing::info;
+use serenity::model::id::RoleId;
 
 use crate::{config::Config, discord_utils::send_message};
 
@@ -68,4 +69,36 @@ pub async fn maybe_benson_greeting(msg: &Message, ctx: &Context, config: &Config
             .unwrap();
         }
     }
+}
+
+/// Try to handle balls commands
+pub async fn maybe_benson_balls(msg: &Message, ctx: &Context, config: &Config) -> bool{
+    // Do not allow the bot to respond to itself
+    if !msg.author.bot {
+        let message = msg.content.to_lowercase();
+        // Handle enable commands
+        if config.benson_balls_enable_triggers.contains(&message) {
+            info!("Got balls enable trigger from user: {}", msg.author);
+            if let Some(member) = &msg.member {
+                let mut user_roles = member.roles.clone();
+                user_roles.push(RoleId(config.benson_balls_role));
+                msg.guild(&ctx).await.unwrap().edit_member(&ctx, msg.author.id, |m| m.roles(user_roles)).await;
+                send_message(&format!("*<@{}> turns **on** their balls*", msg.author.id), &msg.channel_id, &ctx).await;
+                return true;
+            }
+        }
+        // Handle disable commands
+        else if config.benson_balls_disable_triggers.contains(&message) {
+            info!("Got balls disable trigger from user: {}", msg.author);
+            if let Some(member) = &msg.member {
+                let mut user_roles = member.roles.clone();
+                let balls_role = RoleId(config.benson_balls_role);
+                user_roles.drain_filter(|x| *x == balls_role).collect::<Vec<RoleId>>();
+                msg.guild(&ctx).await.unwrap().edit_member(&ctx, msg.author.id, |m| m.roles(user_roles)).await;
+                send_message(&format!("*<@{}> turns **off** their balls*", msg.author.id), &msg.channel_id, &ctx).await;
+                return true;
+            }
+        }
+    }
+    return false;
 }

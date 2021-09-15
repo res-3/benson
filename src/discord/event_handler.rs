@@ -10,9 +10,10 @@ use serenity::{
 };
 use tracing::info;
 
-use crate::auto_reactions::{maybe_autoreact, maybe_benson_greeting, maybe_correct_luna};
+use crate::auto_reactions::{maybe_autoreact, maybe_benson_greeting, maybe_correct_luna, maybe_benson_balls};
 
 use super::state::BotState;
+use crate::sentry_user;
 
 /// The main struct that handles all discord events
 pub struct BotEventHandler;
@@ -28,14 +29,18 @@ impl EventHandler for BotEventHandler {
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
+        sentry_user!(msg);
         // Get a read lock on the config data
         let data_lock = ctx.data.read().await;
         let state_arc = data_lock.get::<BotState>().unwrap().clone();
         let state = state_arc.read().await;
 
         // Handle auto-reactions
-        maybe_autoreact(&msg, &ctx, &ChannelId(state.config.heart_react_channel)).await;
-        maybe_benson_greeting(&msg, &ctx, &state.config).await;
-        maybe_correct_luna(&msg, &ctx).await;
+        let do_not_autoreact = maybe_benson_balls(&msg, &ctx, &state.config).await;
+        if !do_not_autoreact{
+            maybe_autoreact(&msg, &ctx, &ChannelId(state.config.heart_react_channel)).await;
+            maybe_benson_greeting(&msg, &ctx, &state.config).await;
+            maybe_correct_luna(&msg, &ctx).await;
+        } 
     }
 }
