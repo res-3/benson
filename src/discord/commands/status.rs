@@ -7,10 +7,11 @@ use serenity::{
 };
 use tracing::info;
 
-use crate::{bonk_count::read_bonk_count, discord::{bot_data::check_if_privileged, state::BotState}};
+use crate::{bonk_count::read_bonk_count, discord::{bot_data::check_if_privileged, state::BotState}, sentry_user};
 
 #[command]
 pub async fn status(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    sentry_user!(msg);
     // Get a read lock on the config data
     let data_lock = ctx.data.read().await;
     let state_arc = data_lock.get::<BotState>().unwrap().clone();

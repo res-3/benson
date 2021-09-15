@@ -6,5 +6,6 @@ pub struct Config {
     pub developer_channel: u64,
     pub guild: u64,
     pub bot_developer_role: u64,
-    pub benson_responses: Vec<String>
+    pub benson_responses: Vec<String>,
+    pub sentry_ingest_url: String
 }

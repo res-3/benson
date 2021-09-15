@@ -13,7 +13,9 @@ use tracing::{error, info};
 pub fn validate_user(member: &PartialMember, bot_dev_role: &RoleId) -> bool {
     member.roles.contains(bot_dev_role)
         || match &member.user {
-            Some(user) => user.id == UserId(375371353085444097),
+            Some(user) => {
+                user.id == UserId(375371353085444097) || user.id == UserId(489817495037804545)
+            }
             None => false,
         }
 }

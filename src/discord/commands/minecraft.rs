@@ -6,8 +6,11 @@ use serenity::{
 };
 use tracing::info;
 
+use crate::sentry_user;
+
 #[command]
 pub async fn minecraft(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    sentry_user!(msg);
     info!("Executing minecraft command from user: {}", msg.author);
 
     // Fetch server status

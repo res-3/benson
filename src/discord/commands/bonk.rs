@@ -9,13 +9,11 @@ use serenity::{
 };
 use tracing::info;
 
-use crate::{
-    bonk_count::{add_bonk, read_bonk_count},
-    discord_utils::send_message,
-};
+use crate::{bonk_count::{add_bonk, read_bonk_count}, discord_utils::send_message, sentry_user};
 
 #[command]
 pub async fn bonk(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    sentry_user!(msg);
     info!("Executing bonk command from user: {}", msg.author);
 
     // Register the bonk

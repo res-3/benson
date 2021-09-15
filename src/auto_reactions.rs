@@ -53,7 +53,9 @@ pub async fn maybe_benson_greeting(msg: &Message, ctx: &Context, config: &Config
     // Do not allow the bot to respond to itself
     if !msg.author.bot {
         // Check for "benson" in message content
-        if msg.content.to_lowercase().contains("benson") {
+        if msg.content.to_lowercase().contains("benson")
+            && !msg.content.to_lowercase().contains("!benson")
+        {
             info!("Found a message containing benson");
             msg.reply_ping(
                 &ctx.http,
@@ -62,7 +64,8 @@ pub async fn maybe_benson_greeting(msg: &Message, ctx: &Context, config: &Config
                     .get(rand::random::<usize>() % config.benson_responses.len())
                     .unwrap_or(&"Hello :)".to_string()),
             )
-            .await.unwrap();
+            .await
+            .unwrap();
         }
     }
 }

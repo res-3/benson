@@ -8,10 +8,11 @@ use serenity::{
 };
 use tracing::info;
 
-use crate::{audio::{join_guild_voice_channel, leave_guild_voice_channels}, discord::{bot_data::check_if_privileged, state::BotState}, discord_utils::send_message};
+use crate::{audio::{join_guild_voice_channel, leave_guild_voice_channels}, discord::{bot_data::check_if_privileged, state::BotState}, discord_utils::send_message, sentry_user};
 
 #[command]
 pub async fn fuckoff(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    sentry_user!(msg);
     // Get a read lock on the config data
     let data_lock = ctx.data.read().await;
     let state_arc = data_lock.get::<BotState>().unwrap().clone();

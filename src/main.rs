@@ -8,10 +8,10 @@ use crate::{config::Config, discord::init_bot_client};
 
 mod audio;
 mod auto_reactions;
-mod config;
-mod discord_utils;
 mod bonk_count;
+mod config;
 mod discord;
+mod discord_utils;
 
 #[tokio::main]
 async fn main() {
@@ -33,6 +33,15 @@ async fn main() {
     let config_path = matches.value_of("config").unwrap();
     let config: Config = autojson::structify(config_path).unwrap();
     info!("Loaded config file: {}", config_path);
+
+    // Set up the sentry error reporting client
+    let _guard = sentry::init((
+        config.sentry_ingest_url.clone(),
+        sentry::ClientOptions {
+            release: sentry::release_name!(),
+            ..Default::default()
+        },
+    ));
 
     // Get the discord tokens
     let discord_token = std::env::var("DISCORD_TOKEN").expect("$DISCORD_TOKEN not set");

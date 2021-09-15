@@ -5,10 +5,11 @@ use serenity::{
 };
 use tracing::info;
 
-use crate::discord_utils::send_message;
+use crate::{discord_utils::send_message, sentry_user};
 
 #[command]
 pub async fn uwu(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    sentry_user!(msg);
     info!("Executing uwu command from user: {}", msg.author);
 
     // Fetch text from args
