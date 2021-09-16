@@ -3,7 +3,7 @@
 use serenity::{
     client::Context,
     model::{
-        guild::PartialMember,
+        guild::{Guild, PartialMember},
         id::{ChannelId, RoleId, UserId},
     },
 };
@@ -27,3 +27,17 @@ pub async fn send_message(text: &str, channel: &ChannelId, ctx: &Context) {
         error!("Error sending message: {:?}", why);
     }
 }
+
+// pub async fn add_user_role(member: &PartialMember, guild: &Guild, role: &RoleId, ctx: &Context) {
+//     let mut user_roles = member.roles.clone();
+//     user_roles.push(role.clone());
+//     info!(
+//         "Setting user {} roles to: {:?}",
+//         member.user.map(|u| u.name).unwrap_or("Unknown".to_string()),
+//         user_roles
+//     );
+//     guild
+//         .edit_member(&ctx, msg.author.id, |m| m.roles(user_roles))
+//         .await
+//         .unwrap();
+// }
