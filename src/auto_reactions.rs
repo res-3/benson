@@ -126,3 +126,35 @@ pub async fn maybe_benson_balls(msg: &Message, ctx: &Context, config: &Config) -
     }
     return false;
 }
+
+/// Handle the "braincell check" word trigger
+pub async fn maybe_braincell_check(msg: &Message, ctx: &Context, config: &Config) {
+    // Do not allow the bot to respond to itself
+    if !msg.author.bot {
+        // Check for "benson" in message content
+        if msg.content.to_lowercase().starts_with("braincell check") {
+            info!("Running Braincell Check");
+
+            // Try to fetch a username as the third argument
+            let mut args = msg.content.split_whitespace();
+            args.next();
+            args.next();
+            let message_title = match args.next() {
+                Some(x) => format!("Does {} have the braincell?", x),
+                None => "Is the braincell present?".to_string(),
+            };
+
+            msg.channel_id
+                .send_message(&ctx.http, |m| {
+                    m.content(message_title);
+                    m.reactions(vec![
+                        ReactionType::Unicode("✅".to_string()),
+                        ReactionType::Unicode("❌".to_string()),
+                    ]);
+                    m
+                })
+                .await
+                .unwrap();
+        }
+    }
+}
