@@ -5,6 +5,7 @@ use self::minecraft::*;
 use self::ping::*;
 use self::status::*;
 use self::uwu::*;
+use self::wiki::*;
 use serenity::framework::standard::macros::group;
 
 pub mod bonk;
@@ -14,9 +15,10 @@ pub mod minecraft;
 pub mod ping;
 pub mod status;
 pub mod uwu;
+pub mod wiki;
 
 #[group]
-#[commands(ping, uwu, minecraft, bonk)]
+#[commands(ping, uwu, minecraft, bonk, wiki)]
 pub struct BotCommands;
 
 #[group]

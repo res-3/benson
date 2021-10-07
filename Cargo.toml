@@ -50,6 +50,7 @@ async-minecraft-ping = "0.4"
 rand = "0.8"
 reqwest = "0.11"
 base64 = "0.13"
+urlencoding = "2.1.0"
 
 [profile.release]
 lto = true
