@@ -6,7 +6,9 @@
     "benson_responses": [
         "Hello!",
         "Did I hear my name?",
-        "I'm Benson!"
+        "I'm Benson!",
+        "You called, master?",
+        "Mommy? Sorry."
     ],
     "sentry_ingest_url": "https://00436e889bc642408ca1a277eff3c480@o398481.ingest.sentry.io/5961189",
     "benson_balls_enable_triggers": [
@@ -16,6 +18,7 @@
         "benson enable my balls",
         "i have a breeding kink",
         "breeding kink",
+        "mommy kink",
         "cum"
     ],
     "benson_balls_disable_triggers": [
@@ -24,7 +27,8 @@
         "benson, disable my balls",
         "benson disable my balls",
         "benson, turn on firewall",
-        "no cum zone"
+        "no cum zone",
+        "snip snip"
     ],
     "benson_balls_role": 887783756952395796
 }

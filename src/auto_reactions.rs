@@ -1,6 +1,6 @@
 //! Handles automatically reacting to messages
 
-use serenity::model::id::RoleId;
+use serenity::model::id::{EmojiId, RoleId};
 use serenity::{
     client::Context,
     model::{
@@ -155,6 +155,49 @@ pub async fn maybe_braincell_check(msg: &Message, ctx: &Context, config: &Config
                 })
                 .await
                 .unwrap();
+        }
+    }
+}
+
+/// Handle the zws spammer
+pub async fn maybe_zwspam(msg: &Message, ctx: &Context, config: &Config) {
+    // Do not allow the bot to respond to itself
+    if !msg.author.bot {
+        // Check for "benson" in message content
+        if msg.content.to_lowercase() == "\u{200b}" {
+            info!("Running zwspam");
+
+            send_message("\u{200b}", &msg.channel_id, &ctx).await;
+        }
+    }
+}
+
+/// Handle the zws spammer
+pub async fn maybe_fuckle(msg: &Message, ctx: &Context, config: &Config) {
+    // Do not allow the bot to respond to itself
+    if !msg.author.bot {
+        // Check for "benson" in message content
+        if msg.content.to_lowercase().contains("fuckle") {
+            info!("Running fuckle react");
+
+            // Find the fuckle emote
+            let guild_emotes = msg.guild(&ctx).await.unwrap();
+            let fuckle_emote = guild_emotes
+                .emojis
+                .iter()
+                .find(|(id, emote)| emote.name.contains("BenAhaha"))
+                .unwrap();
+
+            msg.react(
+                &ctx.http,
+                ReactionType::Custom {
+                    animated: false,
+                    id: fuckle_emote.0.clone(),
+                    name: Some(fuckle_emote.1.name.clone()),
+                },
+            )
+            .await
+            .unwrap();
         }
     }
 }
