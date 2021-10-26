@@ -172,7 +172,7 @@ pub async fn maybe_zwspam(msg: &Message, ctx: &Context, config: &Config) {
     }
 }
 
-/// Handle the zws spammer
+/// Handle the fuckle command
 pub async fn maybe_fuckle(msg: &Message, ctx: &Context, config: &Config) {
     // Do not allow the bot to respond to itself
     if !msg.author.bot {
@@ -200,4 +200,45 @@ pub async fn maybe_fuckle(msg: &Message, ctx: &Context, config: &Config) {
             .unwrap();
         }
     }
+}
+
+/// Handle the rail command
+pub async fn maybe_rail(msg: &Message, ctx: &Context, config: &Config) -> bool {
+    // Do not allow the bot to respond to itself
+    if !msg.author.bot {
+        // Check for "benson" in message content
+        if msg.content.to_lowercase().contains("rail me")
+            && msg.content.to_lowercase().contains("benson")
+        {
+            info!("Running railing react");
+
+            // Generate a random number to handle the responses
+            let response = match rand::random::<usize>() % 10 {
+                0..=6 => "No. Fuck off",
+                _ => "***BENSON RAILS YOU***",
+            };
+
+            // Respond
+            msg.reply_ping(&ctx.http, response).await.unwrap();
+            return true;
+        }
+    }
+    false
+}
+
+/// Handle the stfu triggers
+pub async fn maybe_stfu(msg: &Message, ctx: &Context, config: &Config) -> bool {
+    // Do not allow the bot to respond to itself
+    if !msg.author.bot {
+        // Check for "benson" in message content
+        if msg.content.to_lowercase().contains("i hardly know her")
+        {
+            info!("Running stfu react");
+
+            // Respond
+            msg.reply_ping(&ctx.http, "*Shut up*").await.unwrap();
+            return true;
+        }
+    }
+    false
 }
