@@ -1,6 +1,6 @@
 //! Handles automatically reacting to messages
 
-use serenity::model::id::{EmojiId, RoleId};
+use serenity::model::id::{EmojiId, RoleId, UserId};
 use serenity::{
     client::Context,
     model::{
@@ -231,8 +231,7 @@ pub async fn maybe_stfu(msg: &Message, ctx: &Context, config: &Config) -> bool {
     // Do not allow the bot to respond to itself
     if !msg.author.bot {
         // Check for "benson" in message content
-        if msg.content.to_lowercase().contains("i hardly know her")
-        {
+        if msg.content.to_lowercase().contains("i hardly know her") {
             info!("Running stfu react");
 
             // Respond
@@ -241,4 +240,32 @@ pub async fn maybe_stfu(msg: &Message, ctx: &Context, config: &Config) -> bool {
         }
     }
     false
+}
+
+/// Handle "good bot"
+pub async fn maybe_good_bot(msg: &Message, ctx: &Context, config: &Config) {
+    // Do not allow the bot to respond to itself
+    if !msg.author.bot {
+        // Check if the message is a response to benson
+        if let Some(parent) = &msg.referenced_message {
+            // Check that the parent message is from benson and the reply is from evan
+            if parent.author.id == ctx.cache.current_user().await.id && msg.author.id == UserId(375371353085444097) {
+                // Check the message content
+                if msg.content.to_lowercase().contains("good bot") {
+                    info!("Running good bot react");
+
+                    // Respond
+                    msg.reply_ping(&ctx.http, "Thank you master").await.unwrap();
+                }
+            }
+        }
+        // // Check for "benson" in message content
+        // if msg.content.to_lowercase().contains("i hardly know her")
+        // {
+        //     info!("Running stfu react");
+
+        //     // Respond
+        //     msg.reply_ping(&ctx.http, "*Shut up*").await.unwrap();
+        // }
+    }
 }

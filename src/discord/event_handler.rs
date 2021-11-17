@@ -10,7 +10,7 @@ use serenity::{
 };
 use tracing::info;
 
-use crate::auto_reactions::{maybe_autoreact, maybe_benson_balls, maybe_benson_greeting, maybe_braincell_check, maybe_correct_luna, maybe_fuckle, maybe_rail, maybe_stfu, maybe_zwspam};
+use crate::auto_reactions::{maybe_autoreact, maybe_benson_balls, maybe_benson_greeting, maybe_braincell_check, maybe_correct_luna, maybe_fuckle, maybe_good_bot, maybe_rail, maybe_stfu, maybe_zwspam};
 
 use super::state::BotState;
 use crate::sentry_user;
@@ -46,6 +46,7 @@ impl EventHandler for BotEventHandler {
             maybe_zwspam(&msg, &ctx, &state.config).await;
             maybe_fuckle(&msg, &ctx, &state.config).await;
             maybe_stfu(&msg, &ctx, &state.config).await;
+            maybe_good_bot(&msg, &ctx, &state.config).await;
         }
     }
 }
